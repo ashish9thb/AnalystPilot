@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Login — AnalystPilot</title>
+<style>
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    :root {
+        --bg: #0A0E1A;
+        --surface: #131829;
+        --primary: #7C5CFF;
+        --cyan: #22D3EE;
+        --mint: #34D399;
+        --text: #E8ECF4;
+        --muted: #8B95A8;
+        --border: rgba(124,92,255,0.15);
+    }
+    body { background-color: var(--bg); color: var(--text); display: flex; min-height: 100vh; }
+    
+    /* Left Side: Form */
+    .auth-container { flex: 1; display: flex; flex-direction: column; justify-content: center; padding: 40px; max-width: 500px; margin: 0 auto; }
+    
+    .brand { display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--text); margin-bottom: 40px; }
+    .brand-text { font-size: 22px; font-weight: 800; letter-spacing: -0.5px; }
+    .brand-text .accent { background: linear-gradient(90deg, var(--primary), var(--cyan)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    
+    h1 { font-size: 28px; font-weight: 800; margin-bottom: 8px; letter-spacing: -0.5px; }
+    p.subtitle { color: var(--muted); font-size: 14px; margin-bottom: 32px; }
+    
+    .form-group { margin-bottom: 20px; }
+    .form-label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 8px; color: var(--text); }
+    .form-input {
+        width: 100%; background: var(--surface); border: 1px solid var(--border);
+        border-radius: 9px; padding: 12px 14px; color: var(--text);
+        font-size: 14px; outline: none; transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .form-input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(124,92,255,0.15); }
+    
+    .form-actions { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; font-size: 13px; }
+    .checkbox-wrap { display: flex; align-items: center; gap: 8px; color: var(--muted); cursor: pointer; }
+    .checkbox-wrap input { accent-color: var(--primary); width: 16px; height: 16px; }
+    .forgot-link { color: var(--cyan); text-decoration: none; font-weight: 500; }
+    .forgot-link:hover { text-decoration: underline; }
+    
+    .btn-primary {
+        width: 100%; padding: 12px; border-radius: 9px; font-size: 14px; font-weight: 600;
+        background: linear-gradient(135deg, var(--primary), var(--cyan)); color: white;
+        border: none; cursor: pointer; transition: all 0.2s;
+        box-shadow: 0 4px 20px rgba(124,92,255,0.3);
+    }
+    .btn-primary:hover { box-shadow: 0 6px 26px rgba(124,92,255,0.5); transform: translateY(-1px); }
+    
+    .auth-footer { text-align: center; margin-top: 24px; font-size: 14px; color: var(--muted); }
+    .auth-footer a { color: var(--text); font-weight: 600; text-decoration: none; }
+    .auth-footer a:hover { color: var(--cyan); }
+
+    /* Right Side: Branding */
+    .branding-side {
+        flex: 1; background: linear-gradient(135deg, rgba(124,92,255,0.1), rgba(34,211,238,0.05));
+        border-left: 1px solid var(--border); display: flex; flex-direction: column;
+        justify-content: center; align-items: center; padding: 40px; position: relative; overflow: hidden;
+    }
+    .branding-side::before {
+        content: ''; position: absolute; width: 400px; height: 400px;
+        background: radial-gradient(circle, rgba(124,92,255,0.4), transparent 70%);
+        top: -100px; right: -100px; filter: blur(60px);
+    }
+    .branding-content { position: relative; z-index: 1; max-width: 400px; text-align: center; }
+    .branding-content h2 { font-size: 32px; font-weight: 800; margin-bottom: 16px; line-height: 1.2; }
+    .branding-content p { color: var(--muted); font-size: 16px; line-height: 1.6; margin-bottom: 32px; }
+    
+    /* Feature List */
+    .feature-list { text-align: left; display: flex; flex-direction: column; gap: 16px; }
+    .feature-item { display: flex; align-items: center; gap: 12px; background: rgba(255,255,255,0.03); padding: 12px 16px; border-radius: 10px; border: 1px solid var(--border); }
+    .feature-icon { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 16px; background: rgba(52,211,153,0.15); color: var(--mint); }
+    .feature-item span { font-size: 14px; font-weight: 500; }
+
+    @media (max-width: 900px) {
+        .branding-side { display: none; }
+        .auth-container { padding: 24px; }
+    }
+</style>
+</head>
+<body>
+
+    <!-- Left: Form -->
+    <div class="auth-container">
+        <a href="/" class="brand">
+            <svg width="32" height="32" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                    <linearGradient id="lg" x1="0" y1="44" x2="44" y2="0">
+                        <stop offset="0%" stop-color="#7C5CFF"/><stop offset="55%" stop-color="#22D3EE"/><stop offset="100%" stop-color="#34D399"/>
+                    </linearGradient>
+                </defs>
+                <rect x="1" y="1" width="42" height="42" rx="13" fill="url(#lg)" opacity="0.10"/>
+                <rect x="1" y="1" width="42" height="42" rx="13" stroke="url(#lg)" stroke-width="1.6"/>
+                <rect x="11" y="24" width="4" height="9" rx="1.5" fill="url(#lg)"/>
+                <rect x="17" y="18" width="4" height="15" rx="1.5" fill="url(#lg)"/>
+                <rect x="23" y="12" width="4" height="21" rx="1.5" fill="url(#lg)"/>
+                <path d="M31 33 V15 H35.5 A5.5 5.5 0 0 1 35.5 26 H31" stroke="#E8ECF4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+            </svg>
+            <span class="brand-text">Analyst<span class="accent">Pilot</span></span>
+        </a>
+
+        <h1>Welcome back</h1>
+        <p class="subtitle">Enter your credentials to access your workspace.</p>
+
+        <form onsubmit="event.preventDefault(); window.location.href='/dashboard';">
+            <div class="form-group">
+                <label class="form-label">Email address</label>
+                <input type="email" class="form-input" placeholder="john@example.com" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Password</label>
+                <input type="password" class="form-input" placeholder="••••••••" required>
+            </div>
+
+            <div class="form-actions">
+                <label class="checkbox-wrap">
+                    <input type="checkbox"> Remember me
+                </label>
+                <a href="/forgot-password" class="forgot-link">Forgot password?</a>
+            </div>
+
+            <button type="submit" class="btn-primary">Log In →</button>
+        </form>
+
+        <div class="auth-footer">
+            Don't have an account? <a href="/register">Sign up</a>
+        </div>
+    </div>
+
+    <!-- Right: Branding -->
+    <div class="branding-side">
+        <div class="branding-content">
+            <h2>Analyze with <br><span style="background: linear-gradient(90deg, var(--primary), var(--cyan)); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">confidence.</span></h2>
+            <p>Upload data, get AI-powered insights, and verify every number with a receipt.</p>
+            
+            <div class="feature-list">
+                <div class="feature-item">
+                    <div class="feature-icon">✓</div>
+                    <span>Verifiable Analysis</span>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon">🔗</div>
+                    <span>Insight Impact Tracker</span>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon">🎓</div>
+                    <span>Team-to-Portfolio Workflow</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

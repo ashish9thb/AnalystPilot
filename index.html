@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AnalystPilot — Verifiable AI Data Analysis</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 44 44'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='44' x2='44' y2='0'%3E%3Cstop offset='0%25' stop-color='%237C5CFF'/%3E%3Cstop offset='100%25' stop-color='%2334D399'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='44' height='44' rx='13' fill='%23131829'/%3E%3Crect x='11' y='24' width='4' height='9' rx='1.5' fill='url(%23g)'/%3E%3Crect x='17' y='18' width='4' height='15' rx='1.5' fill='url(%23g)'/%3E%3Crect x='23' y='12' width='4' height='21' rx='1.5' fill='url(%23g)'/%3E%3Cpath d='M31 33 V15 H35.5 A5.5 5.5 0 0 1 35.5 26 H31' stroke='%23E8ECF4' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E">
+<style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+        --bg: #0A0E1A;
+        --surface: #131829;
+        --surface-2: #1A2138;
+        --primary: #7C5CFF;
+        --cyan: #22D3EE;
+        --mint: #34D399;
+        --amber: #FBBF24;
+        --text: #E8ECF4;
+        --muted: #8B95A8;
+        --border: rgba(124,92,255,0.15);
+    }
+    body {
+        font-family: 'Inter', 'Segoe UI', sans-serif;
+        background: var(--bg);
+        color: var(--text);
+        line-height: 1.6;
+        background-image:
+            radial-gradient(circle at 15% 10%, rgba(124,92,255,0.12), transparent 40%),
+            radial-gradient(circle at 85% 80%, rgba(34,211,238,0.10), transparent 40%);
+        background-attachment: fixed;
+    }
+    /* ========= TOPBAR ========= */
+    .topbar {
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 14px 32px;
+        background: rgba(10,14,26,0.85);
+        backdrop-filter: blur(14px);
+        border-bottom: 1px solid var(--border);
+    }
+    .brand { display: flex; align-items: center; gap: 12px; text-decoration: none; }
+    .brand-text {
+        font-size: 20px;
+        font-weight: 800;
+        color: var(--text);
+        letter-spacing: -0.3px;
+    }
+    .brand-text .accent {
+        background: linear-gradient(90deg, var(--primary), var(--cyan));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+    .topbar-nav { display: flex; gap: 28px; align-items: center; }
+    .topbar-nav a {
+        color: var(--muted);
+        text-decoration: none;
+        font-size: 14px;
+        font-weight: 500;
+        transition: color 0.2s;
+    }
+    .topbar-nav a:hover { color: var(--text); }
+    .topbar-actions { display: flex; gap: 12px; align-items: center; }
+    .btn {
+        padding: 9px 20px;
+        border-radius: 9px;
+        font-weight: 600;
+        font-size: 13.5px;
+        cursor: pointer;
+        border: none;
+        text-decoration: none;
+        transition: all 0.2s;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+    .btn-primary {
+        background: linear-gradient(135deg, var(--primary), var(--cyan));
+        color: white;
+        box-shadow: 0 4px 20px rgba(124,92,255,0.35);
+    }
+    .btn-primary:hover { box-shadow: 0 6px 26px rgba(124,92,255,0.5); transform: translateY(-1px); }
+    .btn-ghost {
+        background: transparent;
+        color: var(--text);
+        border: 1px solid var(--border);
+    }
+    .btn-ghost:hover { background: var(--surface); border-color: var(--primary); }
+    /* ========= HERO ========= */
+    .hero {
+        max-width: 1240px;
+        margin: 0 auto;
+        padding: 90px 32px 60px;
+        display: grid;
+        grid-template-columns: 1.1fr 0.9fr;
+        gap: 60px;
+        align-items: center;
+    }
+    .hero-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: rgba(52,211,153,0.1);
+        color: var(--mint);
+        padding: 6px 14px;
+        border-radius: 20px;
+        font-size: 12.5px;
+        font-weight: 600;
+        margin-bottom: 22px;
+        border: 1px solid rgba(52,211,153,0.25);
+    }
+    .hero-badge::before {
+        content: '';
+        width: 6px; height: 6px;
+        background: var(--mint);
+        border-radius: 50%;
+        box-shadow: 0 0 8px var(--mint);
+    }
+    .hero h1 {
+        font-size: 54px;
+        font-weight: 800;
+        line-height: 1.1;
+        letter-spacing: -1.5px;
+        margin-bottom: 22px;
+    }
+    .gradient-text {
+        background: linear-gradient(135deg, var(--primary) 0%, var(--cyan) 60%, var(--mint) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+    .hero p {
+        font-size: 17px;
+        color: var(--muted);
+        margin-bottom: 32px;
+        max-width: 500px;
+    }
+    .hero-actions { display: flex; gap: 14px; }
+    /* ========= HERO VISUAL ========= */
+    .hero-visual { position: relative; }
+    .glow-orb {
+        position: absolute;
+        width: 300px; height: 300px;
+        border-radius: 50%;
+        filter: blur(80px);
+        opacity: 0.35;
+        z-index: 0;
+    }
+    .orb-1 { background: var(--primary); top: -40px; right: 40px; }
+    .orb-2 { background: var(--cyan); bottom: -20px; left: -20px; }
+    .receipt {
+        position: relative;
+        z-index: 1;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 24px;
+        box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+        margin-bottom: 16px;
+    }
+    .receipt-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 16px;
+    }
+    .receipt-head h4 { font-size: 14px; font-weight: 700; }
+    .verified-pill {
+        background: rgba(52,211,153,0.12);
+        color: var(--mint);
+        padding: 4px 10px;
+        border-radius: 20px;
+        font-size: 11px;
+        font-weight: 700;
+        border: 1px solid rgba(52,211,153,0.3);
+    }
+    .receipt-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 9px 0;
+        font-size: 13px;
+        border-bottom: 1px solid rgba(255,255,255,0.04);
+    }
+    .receipt-row:last-child { border: none; }
+    .receipt-row .k { color: var(--muted); }
+    .receipt-row .v { color: var(--text); font-weight: 600; font-family: 'Courier New', monospace; }
+    .receipt-row .v.warn { color: var(--amber); }
+    /* ========= FEATURES ========= */
+    .section { max-width: 1240px; margin: 0 auto; padding: 70px 32px; }
+    .section-title {
+        font-size: 38px;
+        font-weight: 800;
+        letter-spacing: -1px;
+        text-align: center;
+        margin-bottom: 12px;
+    }
+    .section-sub { text-align: center; color: var(--muted); font-size: 16px; margin-bottom: 50px; }
+    .grid-3 { display: grid; grid-template-columns: repeat(3,1fr); gap: 22px; }
+    .card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 30px;
+        transition: all 0.25s;
+        position: relative;
+        overflow: hidden;
+    }
+    .card::before {
+        content: '';
+        position: absolute;
+        top: 0; left: 0; right: 0;
+        height: 2px;
+        background: linear-gradient(90deg, var(--primary), var(--cyan));
+        opacity: 0;
+        transition: opacity 0.25s;
+    }
+    .card:hover { transform: translateY(-4px); border-color: rgba(124,92,255,0.4); }
+    .card:hover::before { opacity: 1; }
+    .card-icon {
+        width: 48px; height: 48px;
+        border-radius: 12px;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 22px;
+        margin-bottom: 18px;
+    }
+    .ic-violet { background: rgba(124,92,255,0.15); color: var(--primary); }
+    .ic-cyan { background: rgba(34,211,238,0.15); color: var(--cyan); }
+    .ic-mint { background: rgba(52,211,153,0.15); color: var(--mint); }
+    .card h3 { font-size: 18px; margin-bottom: 10px; }
+    .card p { font-size: 14px; color: var(--muted); }
+    /* ========= COMPARISON ========= */
+    .table-wrap {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        overflow: hidden;
+    }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { padding: 16px 20px; text-align: left; font-size: 14px; border-bottom: 1px solid rgba(255,255,255,0.04); }
+    th { background: var(--surface-2); font-weight: 700; color: var(--text); font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; }
+    tr:last-child td { border: none; }
+    .yes { color: var(--mint); font-weight: 700; }
+    .no { color: var(--muted); }
+    .highlight-row td { background: rgba(124,92,255,0.07); }
+    .highlight-row td:first-child { color: var(--cyan); font-weight: 700; }
+    /* ========= CTA ========= */
+    .cta {
+        max-width: 1240px;
+        margin: 40px auto 80px;
+        padding: 70px 40px;
+        border-radius: 24px;
+        text-align: center;
+        background: linear-gradient(135deg, rgba(124,92,255,0.15), rgba(34,211,238,0.1));
+        border: 1px solid var(--border);
+        position: relative;
+        overflow: hidden;
+    }
+    .cta::after {
+        content: '';
+        position: absolute;
+        top: -100px; right: -100px;
+        width: 300px; height: 300px;
+        background: radial-gradient(circle, rgba(124,92,255,0.4), transparent 70%);
+        filter: blur(40px);
+    }
+    .cta h2 { font-size: 40px; font-weight: 800; letter-spacing: -1px; margin-bottom: 14px; position: relative; }
+    .cta p { color: var(--muted); font-size: 16px; margin-bottom: 28px; position: relative; }
+    /* ========= FOOTER ========= */
+    footer {
+        text-align: center;
+        padding: 30px;
+        color: var(--muted);
+        font-size: 13px;
+        border-top: 1px solid var(--border);
+    }
+    /* ========= RESPONSIVE ========= */
+    @media (max-width: 900px) {
+        .hero { grid-template-columns: 1fr; padding: 50px 20px; }
+        .hero h1 { font-size: 38px; }
+        .topbar-nav { display: none; }
+        .grid-3 { grid-template-columns: 1fr; }
+        .section { padding: 50px 20px; }
+        .cta { margin: 20px; padding: 40px 20px; }
+    }
+</style>
+</head>
+<body>
+
+<!-- ========= TOPBAR ========= -->
+<header class="topbar">
+    <a href="/" class="brand">
+        <!-- Option B Logo: A/P Monogram + Growth Bars -->
+        <svg width="40" height="40" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+                <linearGradient id="lgB" x1="0" y1="44" x2="44" y2="0">
+                    <stop offset="0%" stop-color="#7C5CFF"/>
+                    <stop offset="55%" stop-color="#22D3EE"/>
+                    <stop offset="100%" stop-color="#34D399"/>
+                </linearGradient>
+            </defs>
+            <rect x="1" y="1" width="42" height="42" rx="13" fill="url(#lgB)" opacity="0.10"/>
+            <rect x="1" y="1" width="42" height="42" rx="13" stroke="url(#lgB)" stroke-width="1.6"/>
+            <rect x="11" y="24" width="4" height="9" rx="1.5" fill="url(#lgB)"/>
+            <rect x="17" y="18" width="4" height="15" rx="1.5" fill="url(#lgB)"/>
+            <rect x="23" y="12" width="4" height="21" rx="1.5" fill="url(#lgB)"/>
+            <path d="M31 33 V15 H35.5 A5.5 5.5 0 0 1 35.5 26 H31" stroke="#E8ECF4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+            <path d="M10 30 L20 20 L27 25 L36 13" stroke="#34D399" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" opacity="0.9"/>
+            <circle cx="36" cy="13" r="2" fill="#34D399"/>
+        </svg>
+        <span class="brand-text">Analyst<span class="accent">Pilot</span></span>
+    </a>
+
+    <nav class="topbar-nav">
+        <a href="#features">Features</a>
+        <a href="#compare">Compare</a>
+        <a href="#how">How it Works</a>
+    </nav>
+
+    <div class="topbar-actions">
+        <a href="/login" class="btn btn-ghost">Login</a>
+        <a href="/register" class="btn btn-primary">Get Started</a>
+    </div>
+</header>
+
+<!-- ========= HERO ========= -->
+<section class="hero">
+    <div>
+        <div class="hero-badge">VERIFIABLE AI ANALYSIS</div>
+        <h1>Data analysis you can <span class="gradient-text">actually trust</span>.</h1>
+        <p>Upload CSV, Excel, or JSON. Get AI-powered insights — but every number ships with a receipt. No black-box answers. No blind trust.</p>
+        <div class="hero-actions">
+            <a href="/register" class="btn btn-primary">Start Analyzing Free →</a>
+            <a href="#how" class="btn btn-ghost">See How It Works</a>
+        </div>
+    </div>
+    <div class="hero-visual">
+        <div class="glow-orb orb-1"></div>
+        <div class="glow-orb orb-2"></div>
+        <div class="receipt">
+            <div class="receipt-head">
+                <h4>Analysis Receipt</h4>
+                <span class="verified-pill">✓ VERIFIED</span>
+            </div>
+            <div class="receipt-row"><span class="k">Question</span><span class="v">Avg sales by region</span></div>
+            <div class="receipt-row"><span class="k">Dataset</span><span class="v">sales_q3.csv</span></div>
+            <div class="receipt-row"><span class="k">Columns</span><span class="v">region, sales</span></div>
+            <div class="receipt-row"><span class="k">Valid Rows</span><span class="v">1,247</span></div>
+            <div class="receipt-row"><span class="k">Formula</span><span class="v">groupby.mean()</span></div>
+        </div>
+        <div class="receipt">
+            <div class="receipt-head">
+                <h4>Impact Tracker</h4>
+                <span class="verified-pill" style="background:rgba(251,191,36,0.12);color:#FBBF24;border-color:rgba(251,191,36,0.3);">⚠ STALE</span>
+            </div>
+            <div class="receipt-row"><span class="k">Dataset V2 uploaded</span><span class="v warn">3 results stale</span></div>
+            <div class="receipt-row"><span class="k">Affected</span><span class="v">2 charts, 1 KPI</span></div>
+        </div>
+    </div>
+</section>
+
+<!-- ========= FEATURES ========= -->
+<section class="section" id="features">
+    <h2 class="section-title">Why AnalystPilot?</h2>
+    <p class="section-sub">Three things no other free tool gives you together.</p>
+    <div class="grid-3">
+        <div class="card">
+            <div class="card-icon ic-violet">🔍</div>
+            <h3>Verifiable Analysis</h3>
+            <p>Every number comes with a receipt — source dataset, columns, formula, valid row count. AI explains, Pandas calculates.</p>
+        </div>
+        <div class="card">
+            <div class="card-icon ic-cyan">🔗</div>
+            <h3>Insight Impact Tracker</h3>
+            <p>When your dataset changes, AnalystPilot knows which charts, KPIs, and reports are affected — and marks them stale.</p>
+        </div>
+        <div class="card">
+            <div class="card-icon ic-mint">🎓</div>
+            <h3>Team-to-Portfolio</h3>
+            <p>Approved team analyses convert into a portfolio case study automatically — no manual copy-pasting.</p>
+        </div>
+    </div>
+</section>
+
+<!-- ========= COMPARISON ========= -->
+<section class="section" id="compare">
+    <h2 class="section-title">How We Compare</h2>
+    <p class="section-sub">The gap in the market — and how AnalystPilot fills it.</p>
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>Tool</th><th>Verifiable</th><th>Impact</th><th>Portfolio</th><th>Free</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td>Power BI Copilot</td><td class="no">✗</td><td class="no">✗</td><td class="no">✗</td><td class="no">✗</td></tr>
+                <tr><td>Alluvia.ai</td><td class="no">✗</td><td class="no">✗</td><td class="no">✗</td><td class="no">✗</td></tr>
+                <tr><td>Maven Analytics</td><td class="no">✗</td><td class="no">✗</td><td class="yes">✓</td><td class="no">✗</td></tr>
+                <tr><td>Recce / Dataedo</td><td class="no">✗</td><td class="yes">✓</td><td class="no">✗</td><td class="no">✗</td></tr>
+                <tr class="highlight-row"><td>AnalystPilot</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td></tr>
+            </tbody>
+        </table>
+    </div>
+</section>
+
+<!-- ========= CTA ========= -->
+<section class="cta" id="how">
+    <h2>Ready to analyze with confidence?</h2>
+    <p>Join analysts who don't just trust AI — they verify it.</p>
+    <a href="/register" class="btn btn-primary" style="padding:13px 30px;font-size:15px;">Create Free Account</a>
+</section>
+
+<footer>
+    © 2026 AnalystPilot · Built for analysts who verify.
+</footer>
+
+</body>
+</html>

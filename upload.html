@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Upload Dataset — AnalystPilot</title>
+<style>
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    :root {
+        --bg: #0A0E1A;
+        --surface: #131829;
+        --surface-hover: #1A2138;
+        --sidebar-bg: #0D1120;
+        --primary: #7C5CFF;
+        --cyan: #22D3EE;
+        --mint: #34D399;
+        --amber: #FBBF24;
+        --text: #E8ECF4;
+        --muted: #8B95A8;
+        --border: rgba(124,92,255,0.15);
+        --sidebar-w: 260px;
+    }
+    body {
+        background-color: var(--bg);
+        color: var(--text);
+        display: flex;
+        height: 100vh;
+        overflow: hidden;
+    }
+
+    /* ========= SIDEBAR ========= */
+    .sidebar {
+        width: var(--sidebar-w);
+        background: var(--sidebar-bg);
+        border-right: 1px solid var(--border);
+        display: flex;
+        flex-direction: column;
+        height: 100vh;
+        transition: transform 0.3s ease;
+        z-index: 100;
+    }
+    .sidebar-header { padding: 16px; display: flex; align-items: center; justify-content: space-between; }
+    .brand { display: flex; align-items: center; gap: 8px; text-decoration: none; color: var(--text); }
+    .brand-text { font-size: 18px; font-weight: 800; letter-spacing: -0.3px; }
+    .brand-text .accent {
+        background: linear-gradient(90deg, var(--primary), var(--cyan));
+        -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .header-icons { display: flex; gap: 12px; color: var(--muted); }
+    .header-icons span { cursor: pointer; font-size: 16px; transition: color 0.2s; }
+    .header-icons span:hover { color: var(--text); }
+
+    .new-project-btn {
+        margin: 0 16px 20px 16px; padding: 10px 14px; background: transparent;
+        border: 1px solid var(--border); border-radius: 20px; color: var(--text);
+        font-size: 14px; font-weight: 500; display: flex; align-items: center; justify-content: center;
+        gap: 8px; cursor: pointer; transition: all 0.2s;
+    }
+    .new-project-btn:hover { background: var(--surface-hover); border-color: var(--primary); }
+
+    .nav-menu { flex: 1; overflow-y: auto; padding: 0 12px; }
+    .nav-menu::-webkit-scrollbar { width: 4px; }
+    .nav-menu::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
+    .nav-item {
+        display: flex; align-items: center; gap: 12px; padding: 10px 12px;
+        border-radius: 8px; font-size: 14px; font-weight: 500; color: var(--text);
+        text-decoration: none; transition: background 0.2s, color 0.2s; margin-bottom: 2px;
+    }
+    .nav-item:hover { background: var(--surface-hover); }
+    .nav-item.active { background: rgba(124,92,255,0.15); color: var(--cyan); }
+    .nav-item .ico { font-size: 16px; width: 20px; text-align: center; }
+    .sidebar-divider { height: 1px; background: var(--border); margin: 12px 16px; }
+    
+    .sidebar-footer {
+        padding: 16px; border-top: 1px solid var(--border);
+        display: flex; align-items: center; justify-content: space-between;
+        cursor: pointer; transition: background 0.2s;
+    }
+    .sidebar-footer:hover { background: var(--surface-hover); }
+    .profile-info { display: flex; align-items: center; gap: 12px; }
+    .avatar {
+        width: 34px; height: 34px; border-radius: 50%;
+        background: linear-gradient(135deg, var(--primary), var(--cyan));
+        display: flex; align-items: center; justify-content: center;
+        font-size: 14px; font-weight: 700; color: white;
+    }
+    .user-name { font-size: 14px; font-weight: 500; color: var(--text); }
+
+    /* ========= MAIN WRAPPER ========= */
+    .main-wrapper { flex: 1; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+
+    /* Topbar */
+    .topbar {
+        height: 64px; display: flex; align-items: center; justify-content: space-between;
+        padding: 0 24px; border-bottom: 1px solid var(--border);
+        background: rgba(10,14,26,0.5); backdrop-filter: blur(10px);
+    }
+    .topbar-left { display: flex; align-items: center; gap: 16px; }
+    .menu-toggle { display: none; cursor: pointer; color: var(--muted); font-size: 22px; }
+    
+    .topbar-brand { display: none; align-items: center; gap: 8px; text-decoration: none; color: var(--text); }
+    .topbar-brand svg { width: 24px; height: 24px; }
+    .topbar-brand-text { font-size: 16px; font-weight: 800; letter-spacing: -0.3px; }
+    .topbar-brand-text .accent {
+        background: linear-gradient(90deg, var(--primary), var(--cyan));
+        -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+
+    .search-wrap { position: relative; width: 300px; }
+    .search-wrap input {
+        width: 100%; background: var(--surface); border: 1px solid var(--border);
+        border-radius: 9px; padding: 9px 14px 9px 38px; color: var(--text);
+        font-size: 13.5px; outline: none; transition: border-color 0.2s;
+    }
+    .search-wrap input:focus { border-color: var(--primary); }
+    .search-wrap input::placeholder { color: var(--muted); }
+    .search-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--muted); font-size: 14px; }
+
+    .topbar-right { display: flex; align-items: center; gap: 16px; }
+    .icon-btn {
+        width: 38px; height: 38px; border-radius: 9px; background: var(--surface);
+        border: 1px solid var(--border); color: var(--muted);
+        display: flex; align-items: center; justify-content: center;
+        cursor: pointer; font-size: 16px; transition: all 0.2s; position: relative;
+    }
+    .icon-btn:hover { color: var(--text); border-color: var(--primary); }
+    .notif-dot {
+        position: absolute; top: 8px; right: 9px; width: 7px; height: 7px;
+        background: var(--mint); border-radius: 50%; box-shadow: 0 0 6px var(--mint);
+    }
+
+    /* ========= PAGE CONTENT ========= */
+    .content-scroll { flex: 1; overflow-y: auto; padding: 32px; }
+    
+    .page-head { margin-bottom: 28px; display: flex; justify-content: space-between; align-items: flex-end; }
+    .page-head h1 { font-size: 28px; font-weight: 800; letter-spacing: -0.6px; margin-bottom: 4px; }
+    .page-head p { color: var(--muted); font-size: 14.5px; }
+
+    /* ========= UPLOAD ZONE ========= */
+    .upload-zone {
+        background: var(--surface);
+        border: 2px dashed rgba(124,92,255,0.3);
+        border-radius: 16px;
+        padding: 60px 20px;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.25s ease;
+        margin-bottom: 32px;
+        position: relative;
+        overflow: hidden;
+    }
+    .upload-zone:hover, .upload-zone.dragover {
+        border-color: var(--primary);
+        background: rgba(124,92,255,0.05);
+    }
+    .upload-zone.dragover { transform: scale(1.01); }
+    
+    .upload-icon-wrap {
+        width: 64px; height: 64px;
+        background: linear-gradient(135deg, rgba(124,92,255,0.15), rgba(34,211,238,0.1));
+        border-radius: 50%;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 28px; margin: 0 auto 20px;
+        color: var(--primary);
+        box-shadow: 0 0 20px rgba(124,92,255,0.2);
+    }
+    .upload-zone h3 { font-size: 18px; font-weight: 600; margin-bottom: 8px; }
+    .upload-zone p { color: var(--muted); font-size: 14px; margin-bottom: 16px; }
+    .upload-zone .formats {
+        display: inline-flex; gap: 12px; font-size: 12px; font-weight: 600;
+        color: var(--cyan); background: rgba(34,211,238,0.1);
+        padding: 6px 16px; border-radius: 20px;
+    }
+    .upload-zone .max-size { font-size: 12px; color: var(--muted); margin-top: 10px; }
+
+    /* ========= DATASETS LIST ========= */
+    .section-header {
+        display: flex; justify-content: space-between; align-items: center;
+        margin-bottom: 16px;
+    }
+    .section-header h2 { font-size: 18px; font-weight: 700; }
+    
+    .dataset-list { display: flex; flex-direction: column; gap: 12px; }
+    .dataset-item {
+        display: flex; align-items: center; justify-content: space-between;
+        background: var(--surface); border: 1px solid var(--border);
+        border-radius: 12px; padding: 16px 20px;
+        transition: all 0.2s;
+    }
+    .dataset-item:hover { border-color: rgba(124,92,255,0.4); background: var(--surface-hover); }
+    
+    .dataset-left { display: flex; align-items: center; gap: 16px; }
+    .dataset-icon {
+        width: 42px; height: 42px; border-radius: 10px;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 18px;
+    }
+    .ico-csv { background: rgba(52,211,153,0.15); color: var(--mint); }
+    .ico-xlsx { background: rgba(124,92,255,0.15); color: var(--primary); }
+    .ico-json { background: rgba(251,191,36,0.15); color: var(--amber); }
+
+    .dataset-info h4 { font-size: 14.5px; font-weight: 600; margin-bottom: 2px; }
+    .dataset-info p { font-size: 12px; color: var(--muted); }
+    
+    .dataset-right { display: flex; align-items: center; gap: 16px; }
+    .row-count { font-size: 12.5px; font-weight: 600; color: var(--muted); background: var(--bg); padding: 4px 10px; border-radius: 6px; border: 1px solid var(--border); }
+    
+    .btn-preview {
+        background: transparent; color: var(--text); border: 1px solid var(--border);
+        padding: 7px 14px; border-radius: 7px; font-size: 12px; font-weight: 600;
+        cursor: pointer; transition: all 0.2s; text-decoration: none;
+    }
+    .btn-preview:hover { border-color: var(--primary); color: var(--primary); }
+
+    /* Responsive */
+    @media (max-width: 900px) {
+        .sidebar { position: fixed; transform: translateX(-100%); }
+        .sidebar.open { transform: translateX(0); }
+        .menu-toggle { display: block; }
+        .topbar-brand { display: flex; }
+        .search-wrap { display: none; }
+        .content-scroll { padding: 20px; }
+        .dataset-item { flex-direction: column; align-items: flex-start; gap: 12px; }
+        .dataset-right { width: 100%; justify-content: space-between; }
+    }
+</style>
+</head>
+<body>
+
+    <!-- ========= SIDEBAR ========= -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <a href="/" class="brand">
+                <svg width="28" height="28" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <linearGradient id="lgB" x1="0" y1="44" x2="44" y2="0">
+                            <stop offset="0%" stop-color="#7C5CFF"/>
+                            <stop offset="55%" stop-color="#22D3EE"/>
+                            <stop offset="100%" stop-color="#34D399"/>
+                        </linearGradient>
+                    </defs>
+                    <rect x="1" y="1" width="42" height="42" rx="13" fill="url(#lgB)" opacity="0.10"/>
+                    <rect x="1" y="1" width="42" height="42" rx="13" stroke="url(#lgB)" stroke-width="1.6"/>
+                    <rect x="11" y="24" width="4" height="9" rx="1.5" fill="url(#lgB)"/>
+                    <rect x="17" y="18" width="4" height="15" rx="1.5" fill="url(#lgB)"/>
+                    <rect x="23" y="12" width="4" height="21" rx="1.5" fill="url(#lgB)"/>
+                    <path d="M31 33 V15 H35.5 A5.5 5.5 0 0 1 35.5 26 H31" stroke="#E8ECF4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+                    <path d="M10 30 L20 20 L27 25 L36 13" stroke="#34D399" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" opacity="0.9"/>
+                    <circle cx="36" cy="13" r="2" fill="#34D399"/>
+                </svg>
+                <span class="brand-text">Analyst<span class="accent">Pilot</span></span>
+            </a>
+            <div class="header-icons">
+                <span title="Search">🔍</span>
+                <span title="Toggle">◫</span>
+            </div>
+        </div>
+
+        <button class="new-project-btn">
+            <span style="font-size: 16px;">➕</span> New Project
+        </button>
+
+        <div class="nav-menu">
+            <a href="/dashboard" class="nav-item"><span class="ico">📊</span> Dashboard</a>
+            <a href="/projects" class="nav-item"><span class="ico">📁</span> Projects</a>
+            <a href="/create-project" class="nav-item"><span class="ico">➕</span> Create Project</a>
+            
+            <!-- Active Link: Datasets -->
+            <a href="/datasets" class="nav-item active"><span class="ico">💾</span> Datasets</a>
+            <a href="/upload" class="nav-item" style="margin-left: 16px; font-size: 13px; color: var(--text);"><span class="ico">⬆️</span> Upload Dataset</a>
+            
+            <a href="/ai-analyst" class="nav-item"><span class="ico">🤖</span> AI Analyst</a>
+            <a href="/charts" class="nav-item"><span class="ico">📈</span> Charts</a>
+            <a href="/impact-tracker" class="nav-item"><span class="ico">⚡</span> Impact Tracker</a>
+            <a href="/team-studio" class="nav-item"><span class="ico">👥</span> Team Studio</a>
+            <a href="/portfolio" class="nav-item"><span class="ico">🎨</span> Portfolio</a>
+            
+            <div class="sidebar-divider"></div>
+            
+            <a href="/settings" class="nav-item"><span class="ico">⚙️</span> Settings</a>
+            <a href="/logout" class="nav-item"><span class="ico">🚪</span> Logout</a>
+        </div>
+
+        <div class="sidebar-footer">
+            <div class="profile-info">
+                <div class="avatar">JD</div>
+                <div class="user-name">John Doe</div>
+            </div>
+            <div style="color: var(--muted); font-size: 18px; cursor: pointer;">⋯</div>
+        </div>
+    </aside>
+
+    <!-- ========= MAIN WRAPPER ========= -->
+    <div class="main-wrapper">
+        <header class="topbar">
+            <div class="topbar-left">
+                <span class="menu-toggle" onclick="toggleSidebar()">☰</span>
+                <a href="/" class="topbar-brand">
+                    <svg viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                            <linearGradient id="lgMob" x1="0" y1="44" x2="44" y2="0">
+                                <stop offset="0%" stop-color="#7C5CFF"/>
+                                <stop offset="55%" stop-color="#22D3EE"/>
+                                <stop offset="100%" stop-color="#34D399"/>
+                            </linearGradient>
+                        </defs>
+                        <rect x="1" y="1" width="42" height="42" rx="13" fill="url(#lgMob)" opacity="0.10"/>
+                        <rect x="1" y="1" width="42" height="42" rx="13" stroke="url(#lgMob)" stroke-width="1.6"/>
+                        <rect x="11" y="24" width="4" height="9" rx="1.5" fill="url(#lgMob)"/>
+                        <rect x="17" y="18" width="4" height="15" rx="1.5" fill="url(#lgMob)"/>
+                        <rect x="23" y="12" width="4" height="21" rx="1.5" fill="url(#lgMob)"/>
+                        <path d="M31 33 V15 H35.5 A5.5 5.5 0 0 1 35.5 26 H31" stroke="#E8ECF4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+                    </svg>
+                    <span class="topbar-brand-text">Analyst<span class="accent">Pilot</span></span>
+                </a>
+
+                <div class="search-wrap">
+                    <span class="search-icon">🔍</span>
+                    <input type="text" placeholder="Search datasets...">
+                </div>
+            </div>
+            
+            <div class="topbar-right">
+                <div class="icon-btn" title="Notifications">
+                    🔔 <span class="notif-dot"></span>
+                </div>
+            </div>
+        </header>
+
+        <!-- ========= CONTENT ========= -->
+        <main class="content-scroll">
+            <div class="page-head">
+                <div>
+                    <h1>Upload Dataset</h1>
+                    <p>Import your raw data into the workspace for analysis.</p>
+                </div>
+            </div>
+
+            <!-- Drag & Drop Zone -->
+            <div class="upload-zone" id="dropZone">
+                <div class="upload-icon-wrap">⬆</div>
+                <h3>Drag & drop your file here</h3>
+                <p>or click to browse from your computer</p>
+                <div class="formats">
+                    <span>CSV</span> <span>•</span> <span>XLSX</span> <span>•</span> <span>JSON</span>
+                </div>
+                <div class="max-size">Maximum file size: 20 MB</div>
+                <!-- Hidden file input -->
+                <input type="file" id="fileInput" style="display: none;" accept=".csv, .xlsx, .json">
+            </div>
+
+            <!-- Uploaded Datasets List -->
+            <div class="section-header">
+                <h2>Uploaded Datasets</h2>
+            </div>
+            
+            <div class="dataset-list">
+                <!-- Item 1 -->
+                <div class="dataset-item">
+                    <div class="dataset-left">
+                        <div class="dataset-icon ico-csv">📄</div>
+                        <div class="dataset-info">
+                            <h4>sales_q4.csv</h4>
+                            <p>Uploaded 2 hours ago by John Doe</p>
+                        </div>
+                    </div>
+                    <div class="dataset-right">
+                        <div class="row-count">10,234 rows</div>
+                        <a href="/data-preview" class="btn-preview">Preview →</a>
+                    </div>
+                </div>
+
+                <!-- Item 2 -->
+                <div class="dataset-item">
+                    <div class="dataset-left">
+                        <div class="dataset-icon ico-xlsx">📊</div>
+                        <div class="dataset-info">
+                            <h4>customers.xlsx</h4>
+                            <p>Uploaded 1 day ago by John Doe</p>
+                        </div>
+                    </div>
+                    <div class="dataset-right">
+                        <div class="row-count">5,120 rows</div>
+                        <a href="/data-preview" class="btn-preview">Preview →</a>
+                    </div>
+                </div>
+
+                <!-- Item 3 -->
+                <div class="dataset-item">
+                    <div class="dataset-left">
+                        <div class="dataset-icon ico-json">🔗</div>
+                        <div class="dataset-info">
+                            <h4>orders.json</h4>
+                            <p>Uploaded 3 days ago by John Doe</p>
+                        </div>
+                    </div>
+                    <div class="dataset-right">
+                        <div class="row-count">8,900 rows</div>
+                        <a href="/data-preview" class="btn-preview">Preview →</a>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+<script>
+    function toggleSidebar() {
+        document.getElementById('sidebar').classList.toggle('open');
+    }
+
+    // Drag and Drop UI Logic (Frontend only)
+    const dropZone = document.getElementById('dropZone');
+    const fileInput = document.getElementById('fileInput');
+
+    // Click to browse
+    dropZone.addEventListener('click', () => {
+        fileInput.click();
+    });
+
+    // File selected via browse
+    fileInput.addEventListener('change', (e) => {
+        if (e.target.files.length > 0) {
+            handleFile(e.target.files[0]);
+        }
+    });
+
+    // Drag events
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+        dropZone.addEventListener(eventName, preventDefaults, false);
+    });
+
+    function preventDefaults(e) {
+        e.preventDefault();
+        e.stopPropagation();
+    }
+
+    ['dragenter', 'dragover'].forEach(eventName => {
+        dropZone.addEventListener(eventName, () => dropZone.classList.add('dragover'), false);
+    });
+
+    ['dragleave', 'drop'].forEach(eventName => {
+        dropZone.addEventListener(eventName, () => dropZone.classList.remove('dragover'), false);
+    });
+
+    dropZone.addEventListener('drop', (e) => {
+        let dt = e.dataTransfer;
+        let files = dt.files;
+        if (files.length > 0) {
+            handleFile(files[0]);
+        }
+    });
+
+    // Mock File Handler
+    function handleFile(file) {
+        // Validation (Basic frontend check)
+        const validTypes = ['.csv', '.xlsx', '.json'];
+        const fileExt = file.name.substring(file.name.lastIndexOf('.')).toLowerCase();
+        
+        if (!validTypes.includes(fileExt)) {
+            alert('Error: Invalid file type. Please upload CSV, XLSX, or JSON.');
+            return;
+        }
+
+        if (file.size > 20 * 1024 * 1024) {
+            alert('Error: File is too large. Max size is 20MB.');
+            return;
+        }
+
+        // Fake upload simulation
+        dropZone.innerHTML = `
+            <div class="upload-icon-wrap" style="color:var(--mint); border: 2px dashed var(--mint); background: rgba(52,211,153,0.1);">✓</div>
+            <h3 style="color: var(--mint);">${file.name}</h3>
+            <p>File ready to upload...</p>
+        `;
+        
+        setTimeout(() => {
+            alert('File validated! (Backend connection required to actually save the file)');
+            // Reset zone
+            dropZone.innerHTML = `
+                <div class="upload-icon-wrap">⬆</div>
+                <h3>Drag & drop your file here</h3>
+                <p>or click to browse from your computer</p>
+                <div class="formats"><span>CSV</span> <span>•</span> <span>XLSX</span> <span>•</span> <span>JSON</span></div>
+                <div class="max-size">Maximum file size: 20 MB</div>
+            `;
+        }, 1000);
+    }
+</script>
+
+</body>
+</html>

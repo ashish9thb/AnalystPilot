@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard — AnalystPilot</title>
+<style>
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    :root {
+        --bg: #0A0E1A;
+        --surface: #131829;
+        --surface-hover: #1A2138;
+        --sidebar-bg: #0D1120;
+        --primary: #7C5CFF;
+        --cyan: #22D3EE;
+        --mint: #34D399;
+        --amber: #FBBF24;
+        --text: #E8ECF4;
+        --muted: #8B95A8;
+        --border: rgba(124,92,255,0.15);
+        --sidebar-w: 260px;
+    }
+    body {
+        background-color: var(--bg);
+        color: var(--text);
+        display: flex;
+        height: 100vh;
+        overflow: hidden;
+    }
+
+    /* ========= SIDEBAR ========= */
+    .sidebar {
+        width: var(--sidebar-w);
+        background: var(--sidebar-bg);
+        border-right: 1px solid var(--border);
+        display: flex;
+        flex-direction: column;
+        height: 100vh;
+        transition: transform 0.3s ease;
+        z-index: 100;
+    }
+    
+    /* Sidebar Header (Logo + Icons) */
+    .sidebar-header {
+        padding: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+    .brand { display: flex; align-items: center; gap: 8px; text-decoration: none; color: var(--text); }
+    .brand-text { font-size: 18px; font-weight: 800; letter-spacing: -0.3px; }
+    .brand-text .accent {
+        background: linear-gradient(90deg, var(--primary), var(--cyan));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+    .header-icons { display: flex; gap: 12px; color: var(--muted); }
+    .header-icons span { cursor: pointer; font-size: 16px; transition: color 0.2s; }
+    .header-icons span:hover { color: var(--text); }
+
+    /* New Project Button (DeepSeek Style) */
+    .new-project-btn {
+        margin: 0 16px 20px 16px;
+        padding: 10px 14px;
+        background: transparent;
+        border: 1px solid var(--border);
+        border-radius: 20px;
+        color: var(--text);
+        font-size: 14px;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    .new-project-btn:hover { background: var(--surface-hover); border-color: var(--primary); }
+
+    /* Navigation Menu */
+    .nav-menu {
+        flex: 1;
+        overflow-y: auto;
+        padding: 0 12px;
+    }
+    .nav-menu::-webkit-scrollbar { width: 4px; }
+    .nav-menu::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
+    
+    .nav-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 10px 12px;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: 500;
+        color: var(--text);
+        text-decoration: none;
+        transition: background 0.2s, color 0.2s;
+        margin-bottom: 2px;
+    }
+    .nav-item:hover { background: var(--surface-hover); }
+    .nav-item.active {
+        background: rgba(124,92,255,0.15);
+        color: var(--cyan);
+    }
+    .nav-item .ico { font-size: 16px; width: 20px; text-align: center; }
+
+    /* Divider */
+    .sidebar-divider { height: 1px; background: var(--border); margin: 12px 16px; }
+
+    /* Sidebar Footer (Profile) */
+    .sidebar-footer {
+        padding: 16px;
+        border-top: 1px solid var(--border);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+    .sidebar-footer:hover { background: var(--surface-hover); }
+    .profile-info { display: flex; align-items: center; gap: 12px; }
+    .avatar {
+        width: 34px; height: 34px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--primary), var(--cyan));
+        display: flex; align-items: center; justify-content: center;
+        font-size: 14px; font-weight: 700; color: white;
+    }
+    .user-name { font-size: 14px; font-weight: 500; color: var(--text); }
+
+    /* ========= MAIN WRAPPER ========= */
+    .main-wrapper {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        height: 100vh;
+        overflow: hidden;
+    }
+
+    /* Topbar */
+    .topbar {
+        height: 64px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 24px;
+        border-bottom: 1px solid var(--border);
+        background: rgba(10,14,26,0.5);
+        backdrop-filter: blur(10px);
+    }
+    
+    /* Topbar Left (Logo + Menu Toggle + Search) */
+    .topbar-left { 
+        display: flex; 
+        align-items: center; 
+        gap: 16px; 
+    }
+    
+    /* Hamburger Symbol */
+    .menu-toggle { 
+        display: none; 
+        cursor: pointer; 
+        color: var(--muted); 
+        font-size: 22px; 
+    }
+    
+    /* Topbar Brand (Logo + Name next to Hamburger) */
+    .topbar-brand {
+        display: none; /* Desktop pe hidden, mobile pe visible */
+        align-items: center;
+        gap: 8px;
+        text-decoration: none;
+        color: var(--text);
+    }
+    .topbar-brand svg { width: 24px; height: 24px; }
+    .topbar-brand-text { font-size: 16px; font-weight: 800; letter-spacing: -0.3px; }
+    .topbar-brand-text .accent {
+        background: linear-gradient(90deg, var(--primary), var(--cyan));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    /* Search Bar */
+    .search-wrap { position: relative; width: 300px; }
+    .search-wrap input {
+        width: 100%;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 9px;
+        padding: 9px 14px 9px 38px;
+        color: var(--text);
+        font-size: 13.5px;
+        outline: none;
+        transition: border-color 0.2s;
+    }
+    .search-wrap input:focus { border-color: var(--primary); }
+    .search-wrap input::placeholder { color: var(--muted); }
+    .search-icon {
+        position: absolute;
+        left: 12px; top: 50%; transform: translateY(-50%);
+        color: var(--muted); font-size: 14px;
+    }
+
+    .topbar-right { display: flex; align-items: center; gap: 16px; }
+    
+    /* Notifications */
+    .icon-btn {
+        width: 38px; height: 38px;
+        border-radius: 9px;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        color: var(--muted);
+        display: flex; align-items: center; justify-content: center;
+        cursor: pointer; font-size: 16px;
+        transition: all 0.2s;
+        position: relative;
+    }
+    .icon-btn:hover { color: var(--text); border-color: var(--primary); }
+    .notif-dot {
+        position: absolute; top: 8px; right: 9px;
+        width: 7px; height: 7px; background: var(--mint);
+        border-radius: 50%; box-shadow: 0 0 6px var(--mint);
+    }
+
+    /* Dashboard Content */
+    .content-scroll {
+        flex: 1;
+        overflow-y: auto;
+        padding: 32px;
+    }
+    
+    .page-head { margin-bottom: 28px; }
+    .page-head h1 { font-size: 28px; font-weight: 800; letter-spacing: -0.6px; margin-bottom: 4px; }
+    .page-head p { color: var(--muted); font-size: 14.5px; }
+
+    /* Stats */
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 18px;
+        margin-bottom: 28px;
+    }
+    .stat-card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        padding: 20px;
+        position: relative;
+        overflow: hidden;
+    }
+    .stat-card::before {
+        content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+        background: linear-gradient(90deg, var(--primary), var(--cyan));
+    }
+    .stat-card.mint::before { background: linear-gradient(90deg, var(--mint), var(--cyan)); }
+    .stat-card.amber::before { background: linear-gradient(90deg, var(--amber), var(--primary)); }
+    .stat-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 14px; }
+    .stat-label { font-size: 12.5px; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+    .stat-ico {
+        width: 34px; height: 34px; border-radius: 9px;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 16px; background: rgba(124,92,255,0.15);
+    }
+    .stat-value { font-size: 34px; font-weight: 800; margin-bottom: 4px; }
+    .stat-trend { font-size: 12px; color: var(--mint); font-weight: 600; }
+
+    /* Content Grid (Projects + Actions) */
+    .content-grid {
+        display: grid;
+        grid-template-columns: 1.5fr 1fr;
+        gap: 18px;
+    }
+    .panel {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        padding: 22px;
+    }
+    .panel-head {
+        display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px;
+    }
+    .panel-head h3 { font-size: 16px; font-weight: 700; }
+    .panel-head a { font-size: 12.5px; color: var(--cyan); text-decoration: none; font-weight: 600; }
+
+    /* Projects List */
+    .project-item {
+        display: flex; align-items: center; gap: 12px;
+        padding: 12px; border-radius: 10px;
+        text-decoration: none; color: inherit; transition: background 0.15s;
+    }
+    .project-item:hover { background: var(--surface-hover); }
+    .project-ico {
+        width: 38px; height: 38px; border-radius: 9px;
+        background: linear-gradient(135deg, rgba(124,92,255,0.2), rgba(34,211,238,0.15));
+        display: flex; align-items: center; justify-content: center; font-size: 16px;
+    }
+    .project-info { flex: 1; }
+    .project-name { font-size: 13.5px; font-weight: 600; margin-bottom: 2px; }
+    .project-meta { font-size: 11.5px; color: var(--muted); }
+
+    /* Quick Actions */
+    .quick-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
+    .quick-btn {
+        display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px;
+        padding: 16px 8px; background: var(--surface-hover); border: 1px solid var(--border);
+        border-radius: 10px; color: var(--text); text-decoration: none; font-size: 12px; font-weight: 600;
+        transition: all 0.15s;
+    }
+    .quick-btn:hover { border-color: var(--primary); background: rgba(124,92,255,0.1); }
+    .quick-btn .ico { font-size: 18px; }
+
+    /* Activity */
+    .activity-title { font-size: 12px; font-weight: 700; color: var(--muted); text-transform: uppercase; margin-bottom: 12px; }
+    .activity-item { display: flex; gap: 10px; padding: 9px 0; font-size: 12.5px; border-bottom: 1px solid rgba(255,255,255,0.04); }
+    .activity-item:last-child { border: none; }
+    .activity-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--mint); margin-top: 6px; }
+    .activity-text { flex: 1; }
+    .activity-time { color: var(--muted); font-size: 11px; }
+
+    /* ========= RESPONSIVE ========= */
+    @media (max-width: 900px) {
+        .sidebar { position: fixed; transform: translateX(-100%); }
+        .sidebar.open { transform: translateX(0); }
+        
+        /* Mobile pe Menu Toggle aur Logo dikhega */
+        .menu-toggle { display: block; }
+        .topbar-brand { display: flex; }
+        
+        .search-wrap { display: none; }
+        .stats-grid, .content-grid { grid-template-columns: 1fr; }
+        .content-scroll { padding: 20px; }
+    }
+</style>
+</head>
+<body>
+
+    <!-- ========= SIDEBAR ========= -->
+    <aside class="sidebar" id="sidebar">
+        <!-- Header (Logo + Icons) -->
+        <div class="sidebar-header">
+            <a href="/" class="brand">
+                <svg width="28" height="28" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <linearGradient id="lgB" x1="0" y1="44" x2="44" y2="0">
+                            <stop offset="0%" stop-color="#7C5CFF"/>
+                            <stop offset="55%" stop-color="#22D3EE"/>
+                            <stop offset="100%" stop-color="#34D399"/>
+                        </linearGradient>
+                    </defs>
+                    <rect x="1" y="1" width="42" height="42" rx="13" fill="url(#lgB)" opacity="0.10"/>
+                    <rect x="1" y="1" width="42" height="42" rx="13" stroke="url(#lgB)" stroke-width="1.6"/>
+                    <rect x="11" y="24" width="4" height="9" rx="1.5" fill="url(#lgB)"/>
+                    <rect x="17" y="18" width="4" height="15" rx="1.5" fill="url(#lgB)"/>
+                    <rect x="23" y="12" width="4" height="21" rx="1.5" fill="url(#lgB)"/>
+                    <path d="M31 33 V15 H35.5 A5.5 5.5 0 0 1 35.5 26 H31" stroke="#E8ECF4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+                    <path d="M10 30 L20 20 L27 25 L36 13" stroke="#34D399" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" opacity="0.9"/>
+                    <circle cx="36" cy="13" r="2" fill="#34D399"/>
+                </svg>
+                <span class="brand-text">Analyst<span class="accent">Pilot</span></span>
+            </a>
+            <div class="header-icons">
+                <span title="Search">🔍</span>
+                <span title="Toggle">◫</span>
+            </div>
+        </div>
+
+        <!-- New Project Button -->
+        <button class="new-project-btn">
+            <span style="font-size: 16px;">➕</span> New Project
+        </button>
+
+        <!-- Navigation Menu -->
+        <div class="nav-menu">
+            <a href="/dashboard" class="nav-item active"><span class="ico">📊</span> Dashboard</a>
+            <a href="/projects" class="nav-item"><span class="ico">📁</span> Projects</a>
+            <a href="/datasets" class="nav-item"><span class="ico">💾</span> Datasets</a>
+            <a href="/ai-analyst" class="nav-item"><span class="ico">🤖</span> AI Analyst</a>
+            <a href="/charts" class="nav-item"><span class="ico">📈</span> Charts</a>
+            <a href="/impact-tracker" class="nav-item"><span class="ico">⚡</span> Impact Tracker</a>
+            <a href="/team-studio" class="nav-item"><span class="ico">👥</span> Team Studio</a>
+            <a href="/portfolio" class="nav-item"><span class="ico">🎨</span> Portfolio</a>
+            
+            <div class="sidebar-divider"></div>
+            
+            <a href="/settings" class="nav-item"><span class="ico">⚙️</span> Settings</a>
+            <a href="/logout" class="nav-item"><span class="ico">🚪</span> Logout</a>
+        </div>
+
+        <!-- Footer Profile -->
+        <div class="sidebar-footer">
+            <div class="profile-info">
+                <div class="avatar">JD</div>
+                <div class="user-name">John Doe</div>
+            </div>
+            <div style="color: var(--muted); font-size: 18px; cursor: pointer;">⋯</div>
+        </div>
+    </aside>
+
+    <!-- ========= MAIN WRAPPER ========= -->
+    <div class="main-wrapper">
+        <!-- Topbar -->
+        <header class="topbar">
+            <div class="topbar-left">
+                <!-- ☰ Menu Icon -->
+                <span class="menu-toggle" onclick="toggleSidebar()">☰</span>
+                
+                <!-- ☰ ke side mein Logo aur Name (sirf mobile pe dikhega) -->
+                <a href="/" class="topbar-brand">
+                    <svg viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                            <linearGradient id="lgMob" x1="0" y1="44" x2="44" y2="0">
+                                <stop offset="0%" stop-color="#7C5CFF"/>
+                                <stop offset="55%" stop-color="#22D3EE"/>
+                                <stop offset="100%" stop-color="#34D399"/>
+                            </linearGradient>
+                        </defs>
+                        <rect x="1" y="1" width="42" height="42" rx="13" fill="url(#lgMob)" opacity="0.10"/>
+                        <rect x="1" y="1" width="42" height="42" rx="13" stroke="url(#lgMob)" stroke-width="1.6"/>
+                        <rect x="11" y="24" width="4" height="9" rx="1.5" fill="url(#lgMob)"/>
+                        <rect x="17" y="18" width="4" height="15" rx="1.5" fill="url(#lgMob)"/>
+                        <rect x="23" y="12" width="4" height="21" rx="1.5" fill="url(#lgMob)"/>
+                        <path d="M31 33 V15 H35.5 A5.5 5.5 0 0 1 35.5 26 H31" stroke="#E8ECF4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+                    </svg>
+                    <span class="topbar-brand-text">Analyst<span class="accent">Pilot</span></span>
+                </a>
+
+                <!-- Topbar Search -->
+                <div class="search-wrap">
+                    <span class="search-icon">🔍</span>
+                    <input type="text" placeholder="Search projects, datasets...">
+                </div>
+            </div>
+            
+            <div class="topbar-right">
+                <!-- Notifications (Profile hata diya hai) -->
+                <div class="icon-btn" title="Notifications">
+                    🔔 <span class="notif-dot"></span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="content-scroll">
+            <div class="page-head">
+                <h1>Dashboard</h1>
+                <p>Your analytics workspace at a glance</p>
+            </div>
+
+            <!-- Stats -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-top">
+                        <span class="stat-label">Projects</span>
+                        <div class="stat-ico">📁</div>
+                    </div>
+                    <div class="stat-value">12</div>
+                    <div class="stat-trend">↑ +2 this week</div>
+                </div>
+                <div class="stat-card mint">
+                    <div class="stat-top">
+                        <span class="stat-label">Datasets</span>
+                        <div class="stat-ico">🗄️</div>
+                    </div>
+                    <div class="stat-value">24</div>
+                    <div class="stat-trend">↑ +5 this week</div>
+                </div>
+                <div class="stat-card amber">
+                    <div class="stat-top">
+                        <span class="stat-label">Analyses</span>
+                        <div class="stat-ico">📊</div>
+                    </div>
+                    <div class="stat-value">156</div>
+                    <div class="stat-trend">↑ +23 this week</div>
+                </div>
+            </div>
+
+            <!-- Content Grid -->
+            <div class="content-grid">
+                <!-- Recent Projects -->
+                <div class="panel">
+                    <div class="panel-head">
+                        <h3>Recent Projects</h3>
+                        <a href="/projects">View all →</a>
+                    </div>
+                    <a href="/project/1" class="project-item">
+                        <div class="project-ico">📊</div>
+                        <div class="project-info">
+                            <div class="project-name">Sales Analysis</div>
+                            <div class="project-meta">Updated 2 hours ago · 8 datasets</div>
+                        </div>
+                        <span style="color: var(--muted);">→</span>
+                    </a>
+                    <a href="/project/2" class="project-item">
+                        <div class="project-ico">📈</div>
+                        <div class="project-info">
+                            <div class="project-name">Marketing Data</div>
+                            <div class="project-meta">Updated 1 day ago · 5 datasets</div>
+                        </div>
+                        <span style="color: var(--muted);">→</span>
+                    </a>
+                    <a href="/project/3" class="project-item">
+                        <div class="project-ico">👥</div>
+                        <div class="project-info">
+                            <div class="project-name">Customer Churn</div>
+                            <div class="project-meta">Updated 3 days ago · 11 datasets</div>
+                        </div>
+                        <span style="color: var(--muted);">→</span>
+                    </a>
+                </div>
+
+                <!-- Quick Actions + Activity -->
+                <div style="display: flex; flex-direction: column; gap: 18px;">
+                    <div class="panel">
+                        <div class="panel-head">
+                            <h3>Quick Actions</h3>
+                        </div>
+                        <div class="quick-grid">
+                            <a href="/create-project" class="quick-btn">
+                                <span class="ico">➕</span> New Project
+                            </a>
+                            <a href="/upload" class="quick-btn">
+                                <span class="ico">⬆️</span> Upload Dataset
+                            </a>
+                            <a href="/ai-analyst" class="quick-btn">
+                                <span class="ico">🤖</span> Ask AI
+                            </a>
+                            <a href="/charts" class="quick-btn">
+                                <span class="ico">📈</span> Create Chart
+                            </a>
+                        </div>
+
+                        <div class="activity-title">Recent Activity</div>
+                        <div class="activity-item">
+                            <div class="activity-dot"></div>
+                            <div class="activity-text">Analyzed sales by region</div>
+                            <div class="activity-time">2h</div>
+                        </div>
+                        <div class="activity-item">
+                            <div class="activity-dot" style="background: var(--primary);"></div>
+                            <div class="activity-text">Uploaded marketing.csv</div>
+                            <div class="activity-time">5h</div>
+                        </div>
+                        <div class="activity-item">
+                            <div class="activity-dot" style="background: var(--cyan);"></div>
+                            <div class="activity-text">Created churn chart</div>
+                            <div class="activity-time">1d</div>
+                        </div>
+                        <div class="activity-item">
+                            <div class="activity-dot"></div>
+                            <div class="activity-text">AI insight verified</div>
+                            <div class="activity-time">1d</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+<script>
+    function toggleSidebar() {
+        document.getElementById('sidebar').classList.toggle('open');
+    }
+</script>
+
+</body>
+</html>
